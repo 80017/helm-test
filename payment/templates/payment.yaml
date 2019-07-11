@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ .Values.service.name }}-service"
+  labels:
+    app: "{{ .Values.service.name }}-app"
+    tier: backend
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: "{{ .Values.service.name }}-app"
+    tier: backend
+  ports:
+  - port: 3031
+    targetPort: 3031
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Values.service.name }}-deployment"
+  labels:
+    app: "{{ .Values.service.name }}-app"
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "{{ .Values.service.name }}-app"
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: "{{ .Values.service.name }}-app"
+        tier: backend
+    spec:
+      containers:
+      - name: "{{ .Values.service.name }}-container"
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        ports:
+        - containerPort: 3031
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
